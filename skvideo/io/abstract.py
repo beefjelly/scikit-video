@@ -67,8 +67,8 @@ class VideoReaderAbstract(object):
         viddict = {}
         # handle concat muxer - no ffprobe
         if inputdict.get("-f") == "concat":
-            self.extension = inputdict.pop("__extension")
-            self.size = inputdict.pop("__size")
+            self.extension = inputdict.pop("__extension", None)
+            self.size = inputdict.pop("__size", None)
             self.probeInfo = {}
         else:
             # General information
