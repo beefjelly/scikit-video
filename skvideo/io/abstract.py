@@ -64,17 +64,19 @@ class VideoReaderAbstract(object):
         if not outputdict:
             outputdict = {}
 
-        # General information
-        _, self.extension = os.path.splitext(filename)
-        self.size = os.path.getsize(filename)
-        self.probeInfo = self._probe()
-
-        # smartphone video data is weird
-        self.rotationAngle = '0'  # specific FFMPEG
-
         viddict = {}
-        if "video" in self.probeInfo:
-            viddict = self.probeInfo["video"]
+        # handle concat muxer - no ffprobe
+        if inputdict.get("-f") == "concat":
+            self.extension = inputdict.pop("__extension", None)
+            self.size = inputdict.pop("__size", None)
+            self.probeInfo = {}
+        else:
+            # General information
+            _, self.extension = os.path.splitext(filename)
+            self.size = os.path.getsize(filename)
+            self.probeInfo = self._probe()
+            if "video" in self.probeInfo:
+                viddict = self.probeInfo["video"]
 
         self.inputfps = -1
         if ("-r" in inputdict):
@@ -93,6 +95,9 @@ class VideoReaderAbstract(object):
                 self.inputfps = float(frtxt)
         else:
             self.inputfps = self.DEFAULT_FRAMERATE
+
+        # smartphone video data is weird
+        self.rotationAngle = '0'  # specific FFMPEG
 
         # check for transposition tag
         if ('tag' in viddict):
